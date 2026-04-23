@@ -2,7 +2,7 @@
   "name": "AeA Frota – Moçambique",
   "short_name": "AeA Frota",
   "description": "Gestão de Frota – Ayuda en Acción Moçambique",
-  "start_url": "/aea-frota/index.html",
+  "start_url": "/AeA-gestao-de-frota/index.html",
   "display": "standalone",
   "background_color": "#FAF8F5",
   "theme_color": "#F26522",
@@ -40,5 +40,5 @@
       ]
     }
   ],
-  "scope": "/aea-frota/"
+  "scope": "/AeA-gestao-de-frota/"
 }

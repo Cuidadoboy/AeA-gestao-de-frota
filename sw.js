@@ -1,5 +1,5 @@
 // AeA Frota – Service Worker v2
-const CACHE_NAME = 'aea-frota-v3-github';
+const CACHE_NAME = 'aea-frota-v4-github';
 
 const ASSETS = [
   './',
