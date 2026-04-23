@@ -1,0 +1,1666 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#c04e35">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="AeA Frota">
+<meta name="application-name" content="AeA Frota">
+<meta name="description" content="Gestão de Frota – Ayuda en Acción Moçambique">
+<title>AeA Frota – Moçambique</title>
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon-192.png">
+<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+<link rel="icon" type="image/png" sizes="512x512" href="icon-512.png">
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap');
+
+  :root {
+    --aea-red: #c04e35;
+    --aea-red-dark: #9e3b25;
+    --aea-red-light: #f5ddd9;
+    --aea-orange: #d4703a;
+    --bg: #f7f4f1;
+    --bg-card: #ffffff;
+    --text: #1a1612;
+    --text-muted: #6b5d55;
+    --border: #e2d8d2;
+    --border-focus: #c04e35;
+    --success: #2d7a4f;
+    --success-bg: #e8f5ee;
+    --warning: #b06a00;
+    --warning-bg: #fff4e0;
+    --danger: #9e3b25;
+    --danger-bg: #fdecea;
+    --shadow: 0 2px 12px rgba(192,78,53,0.08);
+    --shadow-lg: 0 8px 32px rgba(192,78,53,0.14);
+    --radius: 10px;
+    --radius-lg: 16px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Outfit', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+  }
+
+  /* ── HEADER ── */
+  header {
+    background: #fff;
+    border-bottom: 2px solid var(--aea-red-light);
+    padding: 0 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 64px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+  }
+
+  .logo-area {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+
+  .logo-img {
+    height: 40px;
+    width: auto;
+  }
+
+  .logo-text {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--aea-red);
+    line-height: 1.3;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+  .logo-text span {
+    display: block;
+    font-weight: 400;
+    color: var(--text-muted);
+    font-size: 11px;
+    text-transform: none;
+    letter-spacing: 0;
+  }
+
+  .header-nav {
+    display: flex;
+    gap: 4px;
+  }
+
+  .nav-btn {
+    padding: 8px 16px;
+    border-radius: 8px;
+    border: none;
+    cursor: pointer;
+    font-family: 'Outfit', sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    transition: all 0.18s;
+    background: transparent;
+    color: var(--text-muted);
+  }
+  .nav-btn.active {
+    background: var(--aea-red);
+    color: #fff;
+  }
+  .nav-btn:hover:not(.active) {
+    background: var(--aea-red-light);
+    color: var(--aea-red);
+  }
+
+  /* ── OFFLINE BADGE ── */
+  #offline-badge {
+    display: none;
+    background: var(--warning-bg);
+    color: var(--warning);
+    font-size: 11px;
+    font-weight: 600;
+    padding: 3px 10px;
+    border-radius: 20px;
+    border: 1px solid #f0c97a;
+  }
+
+  /* ── MAIN LAYOUT ── */
+  main {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 28px 20px;
+  }
+
+  .view { display: none; }
+  .view.active { display: block; }
+
+  /* ── CARDS ── */
+  .card {
+    background: var(--bg-card);
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--border);
+    box-shadow: var(--shadow);
+    padding: 28px;
+    margin-bottom: 20px;
+  }
+
+  .section-title {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--aea-red);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 20px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .section-icon {
+    width: 28px;
+    height: 28px;
+    background: var(--aea-red-light);
+    border-radius: 7px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+  }
+
+  /* ── FORM GRID ── */
+  .form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+  }
+  .form-grid.three { grid-template-columns: 1fr 1fr 1fr; }
+  .form-grid.full { grid-template-columns: 1fr; }
+  .span2 { grid-column: span 2; }
+  .span3 { grid-column: span 3; }
+
+  .field {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+  }
+
+  label {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-muted);
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+  }
+
+  input, select, textarea {
+    font-family: 'Outfit', sans-serif;
+    font-size: 14px;
+    padding: 10px 13px;
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--bg);
+    color: var(--text);
+    transition: border-color 0.15s, box-shadow 0.15s;
+    width: 100%;
+  }
+  input:focus, select:focus, textarea:focus {
+    outline: none;
+    border-color: var(--border-focus);
+    box-shadow: 0 0 0 3px rgba(192,78,53,0.1);
+    background: #fff;
+  }
+  textarea { resize: vertical; min-height: 72px; }
+
+  /* ── BUTTONS ── */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 11px 22px;
+    border-radius: var(--radius);
+    border: none;
+    cursor: pointer;
+    font-family: 'Outfit', sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+    transition: all 0.18s;
+    text-decoration: none;
+  }
+  .btn-primary {
+    background: var(--aea-red);
+    color: #fff;
+  }
+  .btn-primary:hover { background: var(--aea-red-dark); transform: translateY(-1px); box-shadow: var(--shadow-lg); }
+  .btn-secondary {
+    background: var(--bg);
+    color: var(--text);
+    border: 1.5px solid var(--border);
+  }
+  .btn-secondary:hover { background: var(--aea-red-light); border-color: var(--aea-red); color: var(--aea-red); }
+  .btn-success { background: var(--success); color: #fff; }
+  .btn-success:hover { background: #235f3d; }
+  .btn-danger { background: var(--danger); color: #fff; }
+  .btn-sm { padding: 6px 13px; font-size: 12px; }
+
+  .btn-row {
+    display: flex;
+    gap: 10px;
+    justify-content: flex-end;
+    margin-top: 24px;
+    flex-wrap: wrap;
+  }
+
+  /* ── REQUISITION NUMBER ── */
+  .req-number {
+    font-family: 'DM Mono', monospace;
+    background: var(--aea-red-light);
+    color: var(--aea-red);
+    padding: 6px 14px;
+    border-radius: 6px;
+    font-size: 16px;
+    font-weight: 500;
+    letter-spacing: 0.06em;
+    display: inline-block;
+    margin-bottom: 20px;
+  }
+
+  /* ── STATUS BADGE ── */
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+  }
+  .badge-pending { background: var(--warning-bg); color: var(--warning); }
+  .badge-approved { background: var(--success-bg); color: var(--success); }
+  .badge-rejected { background: var(--danger-bg); color: var(--danger); }
+  .badge-assigned { background: #e8f0fe; color: #1a56b0; }
+  .badge-free { background: #f0f7f0; color: #2d7a4f; }
+  .badge-no-driver { background: #f5f5f5; color: #777; }
+
+  /* ── TABLE ── */
+  .table-wrap { overflow-x: auto; }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+  }
+  th {
+    background: var(--aea-red);
+    color: #fff;
+    padding: 10px 12px;
+    text-align: left;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+  th:first-child { border-radius: 8px 0 0 0; }
+  th:last-child { border-radius: 0 8px 0 0; }
+  td {
+    padding: 9px 12px;
+    border-bottom: 1px solid var(--border);
+    vertical-align: middle;
+  }
+  tr:hover td { background: var(--bg); }
+  tr.vehicle-header td {
+    background: var(--aea-red-light);
+    font-weight: 700;
+    color: var(--aea-red-dark);
+    font-size: 12px;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+
+  .mono { font-family: 'DM Mono', monospace; font-size: 12px; }
+
+  /* ── WEEKLY PLAN ── */
+  .week-controls {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 24px;
+    flex-wrap: wrap;
+  }
+
+  .week-date-input {
+    font-family: 'DM Mono', monospace;
+    font-size: 15px;
+    padding: 9px 14px;
+    border: 2px solid var(--aea-red);
+    border-radius: var(--radius);
+    background: #fff;
+    color: var(--aea-red);
+    font-weight: 500;
+  }
+
+  .week-label {
+    font-size: 13px;
+    color: var(--text-muted);
+    font-weight: 500;
+  }
+
+  /* ── FLEET CONFIG ── */
+  .fleet-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 14px;
+  }
+
+  .fleet-card {
+    background: var(--bg);
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius);
+    padding: 16px;
+  }
+  .fleet-card h4 {
+    font-size: 13px;
+    font-weight: 700;
+    margin-bottom: 10px;
+    color: var(--aea-red);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  /* ── REQUESTS LIST ── */
+  .req-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .req-item {
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius);
+    padding: 16px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    align-items: flex-start;
+    background: var(--bg);
+  }
+  .req-item.approved { border-color: #a8d5b8; background: #f6fbf8; }
+  .req-item.rejected { border-color: #f0b8b0; background: #fdf6f5; }
+
+  .req-meta {
+    flex: 1;
+    min-width: 200px;
+  }
+  .req-id { font-family: 'DM Mono', monospace; font-size: 12px; color: var(--text-muted); }
+  .req-title { font-size: 14px; font-weight: 600; margin: 3px 0 6px; }
+  .req-details { font-size: 12px; color: var(--text-muted); line-height: 1.6; }
+
+  .req-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    align-items: center;
+  }
+
+  /* ── MODAL OVERLAY ── */
+  .modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(26,22,18,0.5);
+    z-index: 200;
+    justify-content: center;
+    align-items: flex-start;
+    padding: 40px 16px;
+    overflow-y: auto;
+  }
+  .modal-overlay.open { display: flex; }
+
+  .modal {
+    background: #fff;
+    border-radius: var(--radius-lg);
+    width: 100%;
+    max-width: 620px;
+    padding: 30px;
+    box-shadow: var(--shadow-lg);
+    position: relative;
+    animation: slideIn 0.2s ease;
+  }
+  @keyframes slideIn {
+    from { transform: translateY(-20px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+  }
+
+  .modal-title {
+    font-size: 17px;
+    font-weight: 700;
+    margin-bottom: 20px;
+    padding-bottom: 14px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .modal-close {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    background: var(--bg);
+    border: none;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .modal-close:hover { background: var(--aea-red-light); }
+
+  /* ── TOAST ── */
+  #toast {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    z-index: 999;
+    display: none;
+    background: var(--text);
+    color: #fff;
+    padding: 13px 20px;
+    border-radius: 10px;
+    font-size: 14px;
+    font-weight: 500;
+    box-shadow: var(--shadow-lg);
+    max-width: 340px;
+    animation: toastIn 0.25s ease;
+  }
+  @keyframes toastIn { from { opacity:0; transform:translateY(20px); } to { opacity:1; transform:translateY(0); } }
+  #toast.success { background: var(--success); }
+  #toast.error { background: var(--danger); }
+
+  /* ── INSTALL BANNER ── */
+  #install-banner {
+    display: none;
+    position: fixed;
+    bottom: 100px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 180;
+    background: #1a1612;
+    color: #fff;
+    border-radius: 14px;
+    padding: 14px 20px;
+    align-items: center;
+    gap: 14px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.35);
+    max-width: 360px;
+    width: calc(100% - 40px);
+    animation: slideIn 0.3s ease;
+  }
+  #install-banner img { width: 40px; height: 40px; border-radius: 10px; }
+  #install-banner .ib-text { flex: 1; }
+  #install-banner .ib-text strong { display: block; font-size: 13px; }
+  #install-banner .ib-text span { font-size: 11px; opacity: 0.7; }
+  #install-banner .ib-btns { display: flex; flex-direction: column; gap: 6px; }
+  #install-banner .ib-install {
+    background: var(--aea-red); color: #fff;
+    border: none; border-radius: 8px; padding: 7px 14px;
+    font-size: 12px; font-weight: 700; cursor: pointer; white-space: nowrap;
+  }
+  #install-banner .ib-close {
+    background: transparent; color: rgba(255,255,255,0.5);
+    border: none; font-size: 11px; cursor: pointer; text-align: center;
+  }
+
+  /* ── LOGIN MODAL ── */
+  #login-screen {
+    position: fixed;
+    inset: 0;
+    background: rgba(26,22,18,0.55);
+    z-index: 500;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    backdrop-filter: blur(3px);
+  }
+  .login-box {
+    background: #fff;
+    border-radius: 20px;
+    padding: 36px 32px;
+    width: 100%;
+    max-width: 400px;
+    box-shadow: 0 20px 60px rgba(192,78,53,0.22);
+    text-align: center;
+    animation: slideIn 0.25s ease;
+  }
+  .login-box .login-logo {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    margin-bottom: 6px;
+  }
+  .login-box h2 {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--aea-red);
+    margin-bottom: 4px;
+  }
+  .login-box p {
+    font-size: 12px;
+    color: var(--text-muted);
+    margin-bottom: 24px;
+  }
+  .login-box .field {
+    text-align: left;
+    margin-bottom: 14px;
+  }
+  .login-error {
+    background: var(--danger-bg);
+    color: var(--danger);
+    border-radius: 8px;
+    padding: 8px 12px;
+    font-size: 13px;
+    margin-bottom: 14px;
+    display: none;
+  }
+  .login-or {
+    font-size: 12px;
+    color: var(--text-muted);
+    margin: 16px 0 0;
+  }
+  .login-or a {
+    color: var(--aea-red);
+    cursor: pointer;
+    text-decoration: underline;
+  }
+
+  /* ── MANAGER BADGE ── */
+  #manager-badge {
+    display: none;
+    align-items: center;
+    gap: 6px;
+    background: var(--aea-red-light);
+    color: var(--aea-red);
+    font-size: 11px;
+    font-weight: 700;
+    padding: 4px 10px;
+    border-radius: 20px;
+  }
+
+  /* ── FAB BUTTON ── */
+  #fab {
+    position: fixed;
+    bottom: 28px;
+    right: 28px;
+    z-index: 150;
+    width: 62px;
+    height: 62px;
+    border-radius: 50%;
+    background: var(--aea-red);
+    color: #fff;
+    border: none;
+    cursor: pointer;
+    font-size: 30px;
+    line-height: 1;
+    box-shadow: 0 6px 24px rgba(192,78,53,0.45);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.18s, box-shadow 0.18s;
+  }
+  #fab:hover { transform: scale(1.1) rotate(15deg); box-shadow: 0 10px 32px rgba(192,78,53,0.55); }
+  #fab-label {
+    position: fixed;
+    bottom: 36px;
+    right: 100px;
+    z-index: 150;
+    background: var(--text);
+    color: #fff;
+    font-size: 12px;
+    font-weight: 600;
+    padding: 6px 12px;
+    border-radius: 8px;
+    white-space: nowrap;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s;
+  }
+  #fab:hover ~ #fab-label,
+  #fab-label:hover { opacity: 1; }
+
+  /* ── PRINT PLAN ── */
+  @media print {
+    header, .week-controls, .btn-row, .nav-btn, #offline-badge { display: none !important; }
+    body { background: #fff; }
+    .card { box-shadow: none; border: 1px solid #ccc; }
+    th { background: #c04e35 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 700px) {
+    .form-grid { grid-template-columns: 1fr; }
+    .form-grid.three { grid-template-columns: 1fr 1fr; }
+    .span2, .span3 { grid-column: span 1; }
+    header { flex-wrap: wrap; height: auto; padding: 12px 16px; gap: 8px; }
+    .header-nav { width: 100%; justify-content: center; }
+    main { padding: 16px 12px; }
+  }
+
+  .empty-state {
+    text-align: center;
+    padding: 48px 24px;
+    color: var(--text-muted);
+  }
+  .empty-state .emoji { font-size: 40px; margin-bottom: 12px; }
+  .empty-state p { font-size: 14px; }
+
+  .count-badge {
+    background: var(--aea-red);
+    color: #fff;
+    font-size: 10px;
+    font-weight: 700;
+    padding: 1px 6px;
+    border-radius: 10px;
+    margin-left: 4px;
+  }
+
+  /* ── LOGO SVG fallback ── */
+  .logo-svg {
+    width: 44px;
+    height: 44px;
+  }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header>
+  <div class="logo-area">
+    <!-- AeA logo (embedded as data URI from uploaded image) -->
+    <svg class="logo-svg" viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="16" cy="14" r="6" fill="#c04e35" opacity="0.9"/>
+      <circle cx="10" cy="24" r="5" fill="#c04e35" opacity="0.75"/>
+      <circle cx="20" cy="28" r="4" fill="#c04e35" opacity="0.6"/>
+      <circle cx="12" cy="34" r="3" fill="#c04e35" opacity="0.45"/>
+    </svg>
+    <div class="logo-text">
+      Ayuda en Acción
+      <span>Moçambique · Gestão de Frota</span>
+    </div>
+  </div>
+  <div class="header-nav" id="header-nav">
+    <button class="nav-btn" onclick="showView('form')">＋ Nova Requisição</button>
+    <button class="nav-btn manager-only" onclick="showView('requests')" id="nav-requests" style="display:none">Pedidos <span class="count-badge" id="pending-count">0</span></button>
+    <button class="nav-btn manager-only" onclick="showView('plan')" id="nav-plan" style="display:none">Plano Semanal</button>
+    <button class="nav-btn manager-only" onclick="showView('fleet')" id="nav-fleet" style="display:none">⚙ Frota</button>
+    <button class="nav-btn" id="nav-logout" style="display:none;background:var(--aea-red-light);color:var(--aea-red)" onclick="logout()">Sair</button>
+    <button class="nav-btn" id="nav-login-btn" onclick="openLoginModal()" style="border:1.5px solid var(--aea-red);color:var(--aea-red)">🔐 Gestor</button>
+  </div>
+  <div id="manager-badge">🔑 Gestor</div>
+  <div id="offline-badge">✈ Offline</div>
+</header>
+
+<main>
+
+<!-- ══════════════════════════════════════════
+     VIEW 1: FORMULÁRIO DE REQUISIÇÃO
+══════════════════════════════════════════ -->
+<div class="view" id="view-form">
+
+  <div class="card">
+    <div class="section-title">
+      <div class="section-icon">📋</div>
+      Formulário de Requisição de Viatura
+    </div>
+    <div class="req-number" id="req-number-display">REQ-2026-001</div>
+
+    <!-- DADOS DO REQUISITANTE -->
+    <div class="section-title" style="margin-top:8px">
+      <div class="section-icon">👤</div>
+      Dados do Requisitante
+    </div>
+    <div class="form-grid">
+      <div class="field span2">
+        <label>Nome completo *</label>
+        <input type="text" id="f-nome" placeholder="Nome e apelido" />
+      </div>
+      <div class="field">
+        <label>Departamento / Projecto *</label>
+        <input type="text" id="f-dep" placeholder="Ex: WASH, Protecção, Admin" />
+      </div>
+      <div class="field">
+        <label>Contacto (telefone) *</label>
+        <input type="tel" id="f-tel" placeholder="8XXXXXXXX" />
+      </div>
+      <div class="field span2">
+        <label>Email</label>
+        <input type="email" id="f-email" placeholder="nome@ayudaenaccion.org" />
+      </div>
+    </div>
+
+    <!-- DETALHES DA VIAGEM -->
+    <div class="section-title" style="margin-top:24px">
+      <div class="section-icon">🚗</div>
+      Detalhes da Viagem
+    </div>
+    <div class="form-grid three">
+      <div class="field">
+        <label>Data da viagem *</label>
+        <input type="date" id="f-data-saida" />
+      </div>
+      <div class="field">
+        <label>Data de regresso</label>
+        <input type="date" id="f-data-regresso" />
+      </div>
+      <div class="field">
+        <label>Urgência</label>
+        <select id="f-urgencia">
+          <option value="Normal">Normal</option>
+          <option value="Urgente">Urgente</option>
+          <option value="Muito urgente">Muito urgente</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Hora de saída *</label>
+        <input type="time" id="f-hora-saida" value="08:00" />
+      </div>
+      <div class="field">
+        <label>Hora de regresso</label>
+        <input type="time" id="f-hora-regresso" value="17:00" />
+      </div>
+      <div class="field">
+        <label>Nº de passageiros</label>
+        <input type="number" id="f-npax" min="1" max="20" value="1" />
+      </div>
+      <div class="field">
+        <label>Local de partida *</label>
+        <select id="f-partida">
+          <option>Escritório - Pemba</option>
+          <option>Escritório - Maputo</option>
+          <option>Escritório - Palma</option>
+          <option>Campo</option>
+          <option>Outro</option>
+        </select>
+      </div>
+      <div class="field span2">
+        <label>Destino *</label>
+        <input type="text" id="f-destino" placeholder="Ex: Chiure, Metuge, Mueda..." />
+      </div>
+      <div class="field span3">
+        <label>Nomes dos passageiros</label>
+        <input type="text" id="f-pax" placeholder="Ex: Eliseu, Cândido, Gércia" />
+      </div>
+      <div class="field span3">
+        <label>Motivo da viagem *</label>
+        <textarea id="f-motivo" placeholder="Descreva o propósito da viagem e o projecto associado..."></textarea>
+      </div>
+      <div class="field span3">
+        <label>Carga / material a transportar</label>
+        <input type="text" id="f-carga" placeholder="Ex: Equipamento informático, materiais de construção..." />
+      </div>
+      <div class="field span3">
+        <label>Projecto / Doador</label>
+        <input type="text" id="f-projecto" placeholder="Ex: OIM, AECID, UNICEF..." />
+      </div>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn btn-secondary" onclick="clearForm()">🗑 Limpar</button>
+      <button class="btn btn-primary" onclick="submitRequest()">📤 Enviar Pedido</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     VIEW 2: LISTA DE PEDIDOS
+══════════════════════════════════════════ -->
+<div class="view active" id="view-requests">
+  <div class="card">
+    <div class="section-title">
+      <div class="section-icon">📂</div>
+      Pedidos de Viatura
+      <div style="margin-left:auto; display:flex; gap:8px; align-items:center;">
+        <select id="filter-status" onchange="renderRequests()" style="font-size:12px; padding:5px 10px;">
+          <option value="">Todos</option>
+          <option value="Pendente">Pendentes</option>
+          <option value="Aprovado">Aprovados</option>
+          <option value="Rejeitado">Rejeitados</option>
+        </select>
+        <button class="btn btn-sm btn-secondary" onclick="exportCSV()">⬇ CSV</button>
+      </div>
+    </div>
+    <div id="requests-container" class="req-list">
+      <div class="empty-state">
+        <div class="emoji">📋</div>
+        <p>Nenhum pedido ainda.<br>Clica no botão <strong>+</strong> para fazer o primeiro pedido.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     VIEW 3: PLANO SEMANAL
+══════════════════════════════════════════ -->
+<div class="view" id="view-plan">
+  <div class="card">
+    <div class="section-title">
+      <div class="section-icon">📅</div>
+      Plano Semanal de Viaturas
+    </div>
+
+    <div class="week-controls">
+      <label class="week-label">Semana de:</label>
+      <input type="date" class="week-date-input" id="week-start" onchange="renderPlan()" />
+      <button class="btn btn-secondary btn-sm" onclick="prevWeek()">← Anterior</button>
+      <button class="btn btn-secondary btn-sm" onclick="nextWeek()">Próxima →</button>
+      <button class="btn btn-primary btn-sm" onclick="window.print()">🖨 Imprimir</button>
+      <button class="btn btn-secondary btn-sm" onclick="exportPlanCSV()">⬇ CSV</button>
+    </div>
+
+    <div class="table-wrap">
+      <table id="plan-table">
+        <thead>
+          <tr>
+            <th>Viatura</th>
+            <th>Motorista</th>
+            <th>Contacto</th>
+            <th>Dia</th>
+            <th>Data</th>
+            <th>Projecto</th>
+            <th>Passageiros</th>
+            <th>Saída</th>
+            <th>Regresso</th>
+            <th>Local/Destino</th>
+            <th>Estado</th>
+          </tr>
+        </thead>
+        <tbody id="plan-body"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     VIEW 4: CONFIGURAÇÃO DE FROTA
+══════════════════════════════════════════ -->
+<div class="view" id="view-fleet">
+  <div class="card">
+    <div class="section-title">
+      <div class="section-icon">🚙</div>
+      Configuração da Frota
+      <button class="btn btn-primary btn-sm" style="margin-left:auto" onclick="openFleetModal()">+ Adicionar Viatura</button>
+    </div>
+    <div class="fleet-grid" id="fleet-grid"></div>
+  </div>
+</div>
+
+</main>
+
+<!-- ══════════════════════════════════════════
+     MODAL: ATRIBUIÇÃO DO GESTOR DE FROTA
+══════════════════════════════════════════ -->
+<div class="modal-overlay" id="modal-assign">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('modal-assign')">✕</button>
+    <div class="modal-title">🔧 Atribuição – Gestor de Frota</div>
+    <input type="hidden" id="assign-req-id" />
+    <div class="form-grid">
+      <div class="field">
+        <label>Viatura atribuída</label>
+        <select id="assign-viatura"></select>
+      </div>
+      <div class="field">
+        <label>Motorista</label>
+        <select id="assign-motorista"></select>
+      </div>
+      <div class="field">
+        <label>Estado</label>
+        <select id="assign-estado">
+          <option value="Aprovado">Aprovado</option>
+          <option value="Rejeitado">Rejeitado</option>
+          <option value="Pendente">Pendente</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Data de aprovação</label>
+        <input type="date" id="assign-data" />
+      </div>
+      <div class="field span2">
+        <label>Observações</label>
+        <textarea id="assign-obs" rows="2" placeholder="Notas para o requisitante..."></textarea>
+      </div>
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-secondary" onclick="closeModal('modal-assign')">Cancelar</button>
+      <button class="btn btn-success" onclick="saveAssignment()">✔ Guardar</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: NOVA VIATURA -->
+<div class="modal-overlay" id="modal-fleet">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('modal-fleet')">✕</button>
+    <div class="modal-title">🚙 Nova Viatura</div>
+    <div class="form-grid">
+      <div class="field">
+        <label>Nome / Modelo</label>
+        <input type="text" id="fleet-nome" placeholder="Ex: Hilux, Mazda BT-50" />
+      </div>
+      <div class="field">
+        <label>Matrícula</label>
+        <input type="text" id="fleet-mat" placeholder="MCA-XXX-XX" />
+      </div>
+      <div class="field">
+        <label>Motorista padrão</label>
+        <input type="text" id="fleet-motorista" placeholder="Nome do motorista" />
+      </div>
+      <div class="field">
+        <label>Contacto motorista</label>
+        <input type="tel" id="fleet-tel" placeholder="8XXXXXXXX" />
+      </div>
+      <div class="field">
+        <label>Base / Localização</label>
+        <select id="fleet-base">
+          <option>Pemba</option>
+          <option>Maputo</option>
+          <option>Palma</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Estado</label>
+        <select id="fleet-estado">
+          <option value="Operacional">Operacional</option>
+          <option value="Em manutenção">Em manutenção</option>
+          <option value="Inoperacional">Inoperacional</option>
+        </select>
+      </div>
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-secondary" onclick="closeModal('modal-fleet')">Cancelar</button>
+      <button class="btn btn-primary" onclick="saveFleetVehicle()">Guardar</button>
+    </div>
+  </div>
+</div>
+
+<!-- INSTALL BANNER PWA -->
+<div id="install-banner">
+  <img src="icon-192.png" alt="AeA Frota">
+  <div class="ib-text">
+    <strong>Instalar AeA Frota</strong>
+    <span>Acesso rápido, funciona offline</span>
+  </div>
+  <div class="ib-btns">
+    <button class="ib-install" onclick="installApp()">⬇ Instalar</button>
+    <button class="ib-close" onclick="this.closest('#install-banner').style.display='none'">Agora não</button>
+  </div>
+</div>
+
+<!-- LOGIN MODAL (Gestor de Frota) -->
+<div id="login-screen" style="display:none">
+  <div class="login-box">
+    <div class="login-logo">
+      <svg width="40" height="40" viewBox="0 0 44 44" fill="none">
+        <circle cx="16" cy="14" r="6" fill="#c04e35" opacity="0.9"/>
+        <circle cx="10" cy="24" r="5" fill="#c04e35" opacity="0.75"/>
+        <circle cx="20" cy="28" r="4" fill="#c04e35" opacity="0.6"/>
+        <circle cx="12" cy="34" r="3" fill="#c04e35" opacity="0.45"/>
+      </svg>
+      <div style="text-align:left">
+        <div style="font-size:15px;font-weight:700;color:var(--aea-red)">Ayuda en Acción</div>
+        <div style="font-size:11px;color:var(--text-muted)">Gestão de Frota · Moçambique</div>
+      </div>
+    </div>
+    <h2 style="margin-top:20px">Acesso Gestor de Frota</h2>
+    <p>Introduz as tuas credenciais para aceder à gestão completa</p>
+    <div class="login-error" id="login-error">Email ou senha incorrectos.</div>
+    <div class="field">
+      <label>Email</label>
+      <input type="email" id="login-email" placeholder="nome@ayudaenaccion.org" />
+    </div>
+    <div class="field">
+      <label>Senha</label>
+      <input type="password" id="login-pass" placeholder="••••••••" onkeydown="if(event.key==='Enter')doLogin()" />
+    </div>
+    <button class="btn btn-primary" style="width:100%;margin-top:6px" onclick="doLogin()">🔐 Entrar</button>
+    <p class="login-or">Não és gestor? <a onclick="closeLoginModal()">Fazer requisição →</a></p>
+  </div>
+</div>
+
+<!-- FAB: Novo Pedido -->
+<button id="fab" title="Novo Pedido de Viatura" onclick="goToForm()">＋</button>
+<div id="fab-label">Novo Pedido</div>
+
+<!-- TOAST -->
+<div id="toast"></div>
+
+<script>
+// ═══════════════════════════════════════
+// DATA LAYER – localStorage persistence
+// ═══════════════════════════════════════
+const LS = {
+  get: k => { try { return JSON.parse(localStorage.getItem(k)); } catch { return null; } },
+  set: (k,v) => localStorage.setItem(k, JSON.stringify(v)),
+};
+
+// Seed default fleet if empty
+function initFleet() {
+  if (!LS.get('fleet')) {
+    LS.set('fleet', [
+      { id:'v1', nome:'Hilux', mat:'MCA-001-MZ', motorista:'Abdul', tel:'860208969', base:'Pemba', estado:'Operacional' },
+      { id:'v2', nome:'Mazda BT-50', mat:'MCA-002-MZ', motorista:'Augusto', tel:'866353690', base:'Pemba', estado:'Operacional' },
+      { id:'v3', nome:'Nissan Hard Body', mat:'MCA-003-MZ', motorista:'', tel:'', base:'Pemba', estado:'Operacional' },
+      { id:'v4', nome:'Hilux', mat:'MCA-004-MZ', motorista:'Kenneth', tel:'', base:'Pemba', estado:'Operacional' },
+      { id:'v5', nome:'ISUZU', mat:'MCA-005-MZ', motorista:'', tel:'', base:'Pemba', estado:'Operacional' },
+    ]);
+  }
+  if (!LS.get('requests')) LS.set('requests', []);
+}
+
+function getFleet() { return LS.get('fleet') || []; }
+function getRequests() { return LS.get('requests') || []; }
+function saveRequests(r) { LS.set('requests', r); }
+
+// ═══════════════════════════════════════
+// NAVIGATION
+// ═══════════════════════════════════════
+function showView(v) {
+  document.querySelectorAll('.view').forEach(el => el.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(el => el.classList.remove('active'));
+  document.getElementById('view-' + v).classList.add('active');
+  event.target.classList.add('active');
+  if (v === 'requests') renderRequests();
+  if (v === 'plan') renderPlan();
+  if (v === 'fleet') renderFleet();
+}
+
+// ═══════════════════════════════════════
+// REQUEST NUMBER GENERATOR
+// ═══════════════════════════════════════
+function nextReqNumber() {
+  const reqs = getRequests();
+  const year = new Date().getFullYear();
+  const n = reqs.filter(r => r.id.includes(year)).length + 1;
+  return `REQ-${year}-${String(n).padStart(3,'0')}`;
+}
+
+function refreshReqNumber() {
+  document.getElementById('req-number-display').textContent = nextReqNumber();
+}
+
+// ═══════════════════════════════════════
+// FORM SUBMIT
+// ═══════════════════════════════════════
+function submitRequest() {
+  const get = id => document.getElementById(id).value.trim();
+  const required = ['f-nome','f-dep','f-tel','f-data-saida','f-hora-saida','f-partida','f-destino','f-motivo'];
+  const labels = ['Nome','Departamento','Telefone','Data da viagem','Hora de saída','Local de partida','Destino','Motivo'];
+  
+  for (let i = 0; i < required.length; i++) {
+    if (!get(required[i])) {
+      toast(`Campo obrigatório: ${labels[i]}`, 'error');
+      document.getElementById(required[i]).focus();
+      return;
+    }
+  }
+
+  const reqs = getRequests();
+  const req = {
+    id: nextReqNumber(),
+    created: new Date().toISOString(),
+    status: 'Pendente',
+    // Requisitante
+    nome: get('f-nome'),
+    dep: get('f-dep'),
+    tel: get('f-tel'),
+    email: get('f-email'),
+    // Viagem
+    dataSaida: get('f-data-saida'),
+    dataRegresso: get('f-data-regresso') || get('f-data-saida'),
+    horaSaida: get('f-hora-saida'),
+    horaRegresso: get('f-hora-regresso'),
+    partida: get('f-partida'),
+    destino: get('f-destino'),
+    motivo: get('f-motivo'),
+    npax: get('f-npax'),
+    pax: get('f-pax'),
+    carga: get('f-carga'),
+    projecto: get('f-projecto'),
+    urgencia: get('f-urgencia'),
+    // Atribuição (gestor de frota)
+    viaturaId: '', viaturaNome: '', motorista: '', contactoMotorista: '',
+    dataAprovacao: '', obsGestor: '',
+  };
+
+  reqs.push(req);
+  saveRequests(reqs);
+  clearForm();
+  refreshReqNumber();
+  updatePendingCount();
+  toast(`✔ Pedido ${req.id} enviado com sucesso!`, 'success');
+}
+
+function clearForm() {
+  ['f-nome','f-dep','f-tel','f-email','f-data-saida','f-data-regresso',
+   'f-destino','f-motivo','f-carga','f-projecto','f-pax'].forEach(id => {
+    document.getElementById(id).value = '';
+  });
+  document.getElementById('f-hora-saida').value = '08:00';
+  document.getElementById('f-hora-regresso').value = '17:00';
+  document.getElementById('f-npax').value = '1';
+  document.getElementById('f-urgencia').value = 'Normal';
+  document.getElementById('f-partida').selectedIndex = 0;
+}
+
+// ═══════════════════════════════════════
+// REQUESTS LIST
+// ═══════════════════════════════════════
+function renderRequests() {
+  const filter = document.getElementById('filter-status').value;
+  let reqs = getRequests();
+  if (filter) reqs = reqs.filter(r => r.status === filter);
+  reqs = reqs.slice().reverse();
+
+  const c = document.getElementById('requests-container');
+  if (!reqs.length) {
+    c.innerHTML = `<div class="empty-state"><div class="emoji">📋</div><p>Nenhum pedido encontrado.</p></div>`;
+    return;
+  }
+
+  c.innerHTML = reqs.map(r => {
+    const badgeClass = r.status === 'Aprovado' ? 'badge-approved' : r.status === 'Rejeitado' ? 'badge-rejected' : 'badge-pending';
+    return `
+      <div class="req-item ${r.status.toLowerCase()}" id="req-${r.id}">
+        <div class="req-meta">
+          <div class="req-id">${r.id} · ${formatDate(r.created)}</div>
+          <div class="req-title">${r.nome} → ${r.destino}</div>
+          <div class="req-details">
+            📅 ${r.dataSaida}${r.dataRegresso !== r.dataSaida ? ' – ' + r.dataRegresso : ''} &nbsp;·&nbsp;
+            🕐 ${r.horaSaida} → ${r.horaRegresso} &nbsp;·&nbsp;
+            ${r.dep} &nbsp;·&nbsp; ${r.urgencia}<br>
+            ${r.projecto ? '📁 ' + r.projecto + ' &nbsp;·&nbsp;' : ''}
+            👥 ${r.pax || '(sem lista)'}<br>
+            ${r.motivo}
+            ${r.viaturaId ? `<br>🚗 ${r.viaturaNome} · ${r.motorista} (${r.contactoMotorista})` : ''}
+            ${r.obsGestor ? `<br>💬 ${r.obsGestor}` : ''}
+          </div>
+        </div>
+        <div class="req-actions">
+          <span class="badge ${badgeClass}">${r.status}</span>
+          ${r.status === 'Pendente' ? `<button class="btn btn-sm btn-primary" onclick="openAssign('${r.id}')">🔧 Atribuir</button>` : `<button class="btn btn-sm btn-secondary" onclick="openAssign('${r.id}')">✎ Editar</button>`}
+          <button class="btn btn-sm btn-danger" onclick="deleteRequest('${r.id}')">✕</button>
+        </div>
+      </div>`;
+  }).join('');
+}
+
+function deleteRequest(id) {
+  if (!confirm('Eliminar pedido ' + id + '?')) return;
+  const reqs = getRequests().filter(r => r.id !== id);
+  saveRequests(reqs);
+  renderRequests();
+  updatePendingCount();
+  toast('Pedido eliminado.', '');
+}
+
+function updatePendingCount() {
+  const n = getRequests().filter(r => r.status === 'Pendente').length;
+  document.getElementById('pending-count').textContent = n;
+}
+
+// ═══════════════════════════════════════
+// ASSIGNMENT MODAL
+// ═══════════════════════════════════════
+function openAssign(id) {
+  const req = getRequests().find(r => r.id === id);
+  if (!req) return;
+  document.getElementById('assign-req-id').value = id;
+  document.getElementById('assign-obs').value = req.obsGestor || '';
+  document.getElementById('assign-estado').value = req.status;
+  document.getElementById('assign-data').value = req.dataAprovacao || new Date().toISOString().slice(0,10);
+
+  // Populate fleet selects
+  const fleet = getFleet();
+  const vSel = document.getElementById('assign-viatura');
+  vSel.innerHTML = '<option value="">-- Seleccionar --</option>' +
+    fleet.map(v => `<option value="${v.id}" ${req.viaturaId === v.id ? 'selected' : ''}>${v.nome} (${v.mat || 'sem mat.'})</option>`).join('');
+
+  const mSel = document.getElementById('assign-motorista');
+  mSel.innerHTML = '<option value="">-- Seleccionar --</option>' +
+    fleet.filter(v => v.motorista).map(v => `<option value="${v.id}" ${req.viaturaId === v.id ? 'selected' : ''}>${v.motorista} · ${v.nome}</option>`).join('');
+
+  document.getElementById('modal-assign').classList.add('open');
+}
+
+function saveAssignment() {
+  const id = document.getElementById('assign-req-id').value;
+  const vId = document.getElementById('assign-viatura').value;
+  const mId = document.getElementById('assign-motorista').value;
+  const fleet = getFleet();
+  const veh = fleet.find(v => v.id === vId);
+  const mot = fleet.find(v => v.id === mId);
+
+  const reqs = getRequests().map(r => {
+    if (r.id !== id) return r;
+    return {
+      ...r,
+      viaturaId: vId,
+      viaturaNome: veh ? `${veh.nome} (${veh.mat})` : '',
+      motorista: mot ? mot.motorista : (veh ? veh.motorista : ''),
+      contactoMotorista: mot ? mot.tel : (veh ? veh.tel : ''),
+      status: document.getElementById('assign-estado').value,
+      dataAprovacao: document.getElementById('assign-data').value,
+      obsGestor: document.getElementById('assign-obs').value,
+    };
+  });
+  saveRequests(reqs);
+  closeModal('modal-assign');
+  renderRequests();
+  updatePendingCount();
+  toast('Atribuição guardada com sucesso.', 'success');
+}
+
+// ═══════════════════════════════════════
+// WEEKLY PLAN
+// ═══════════════════════════════════════
+const DAYS_PT = ['Segunda','Terça','Quarta','Quinta','Sexta'];
+
+function getMondayOf(d) {
+  const dt = new Date(d);
+  const day = dt.getDay(); // 0=sun
+  const diff = (day === 0 ? -6 : 1 - day);
+  dt.setDate(dt.getDate() + diff);
+  return dt;
+}
+
+function renderPlan() {
+  const wInput = document.getElementById('week-start');
+  let monday = wInput.value ? getMondayOf(wInput.value + 'T12:00:00') : getMondayOf(new Date());
+  wInput.value = monday.toISOString().slice(0,10);
+
+  const fleet = getFleet();
+  const reqs = getRequests().filter(r => r.status === 'Aprovado');
+  const body = document.getElementById('plan-body');
+  let rows = '';
+
+  // Build date map for the week
+  const weekDates = DAYS_PT.map((day, i) => {
+    const d = new Date(monday);
+    d.setDate(monday.getDate() + i);
+    return { day, date: d };
+  });
+
+  fleet.forEach(v => {
+    weekDates.forEach((wd, di) => {
+      const dateStr = wd.date.toISOString().slice(0,10);
+      // Find an approved request for this vehicle on this date
+      const req = reqs.find(r => r.viaturaId === v.id && r.dataSaida === dateStr);
+
+      const hasDriver = v.motorista;
+      let estado, estadoBadge, projecto, pax, saida, regresso, local;
+
+      if (!hasDriver) {
+        estado = 'Sem motorista'; estadoBadge = 'badge-no-driver';
+        projecto = pax = saida = regresso = local = '';
+      } else if (req) {
+        estado = 'Atribuído'; estadoBadge = 'badge-assigned';
+        projecto = req.projecto || req.dep;
+        pax = req.pax || req.nome;
+        saida = req.horaSaida;
+        regresso = req.horaRegresso;
+        local = req.destino;
+      } else {
+        estado = 'Livre'; estadoBadge = 'badge-free';
+        projecto = pax = '';
+        saida = '8:00'; regresso = '17:00';
+        local = v.base ? 'Escritório' : 'Escritório';
+      }
+
+      const isFirst = di === 0;
+      rows += `<tr${isFirst ? ' class="vehicle-header"' : ''}>
+        ${isFirst ? `<td rowspan="5" style="font-weight:700;color:var(--aea-red-dark);vertical-align:top;padding-top:14px;">${v.nome}<br><span class="mono" style="font-size:11px;color:var(--text-muted)">${v.mat||''}</span></td>
+        <td rowspan="5" style="vertical-align:top;padding-top:14px;">${v.motorista||'<span style="color:#aaa">—</span>'}</td>
+        <td rowspan="5" class="mono" style="vertical-align:top;padding-top:14px;">${v.tel||''}</td>` : ''}
+        <td>${wd.day}</td>
+        <td class="mono">${formatDatePT(wd.date)}</td>
+        <td>${projecto}</td>
+        <td>${pax}</td>
+        <td class="mono">${saida}</td>
+        <td class="mono">${regresso}</td>
+        <td>${local}</td>
+        <td><span class="badge ${estadoBadge}">${estado}</span></td>
+      </tr>`;
+    });
+  });
+
+  body.innerHTML = rows || '<tr><td colspan="11" style="text-align:center;padding:40px;color:var(--text-muted)">Nenhuma viatura configurada. Vá a ⚙ Frota para adicionar.</td></tr>';
+}
+
+function prevWeek() {
+  const wInput = document.getElementById('week-start');
+  const d = new Date(wInput.value + 'T12:00:00');
+  d.setDate(d.getDate() - 7);
+  wInput.value = d.toISOString().slice(0,10);
+  renderPlan();
+}
+function nextWeek() {
+  const wInput = document.getElementById('week-start');
+  const d = new Date(wInput.value + 'T12:00:00');
+  d.setDate(d.getDate() + 7);
+  wInput.value = d.toISOString().slice(0,10);
+  renderPlan();
+}
+
+// ═══════════════════════════════════════
+// FLEET MANAGEMENT
+// ═══════════════════════════════════════
+function renderFleet() {
+  const fleet = getFleet();
+  const grid = document.getElementById('fleet-grid');
+  if (!fleet.length) {
+    grid.innerHTML = `<div class="empty-state"><div class="emoji">🚗</div><p>Nenhuma viatura configurada.</p></div>`;
+    return;
+  }
+  grid.innerHTML = fleet.map(v => `
+    <div class="fleet-card">
+      <h4>🚙 ${v.nome} <span style="font-weight:400;color:var(--text-muted);font-size:11px">${v.estado}</span></h4>
+      <div style="font-size:12px;line-height:1.8;color:var(--text-muted)">
+        <b>Matrícula:</b> <span class="mono">${v.mat||'—'}</span><br>
+        <b>Motorista:</b> ${v.motorista||'<em>sem motorista</em>'}<br>
+        <b>Contacto:</b> <span class="mono">${v.tel||'—'}</span><br>
+        <b>Base:</b> ${v.base||'—'}
+      </div>
+      <div style="margin-top:10px;display:flex;gap:6px;">
+        <button class="btn btn-sm btn-secondary" onclick="editFleetVehicle('${v.id}')">✎ Editar</button>
+        <button class="btn btn-sm btn-danger" onclick="deleteFleetVehicle('${v.id}')">✕</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+function openFleetModal(id) {
+  document.getElementById('fleet-nome').value = '';
+  document.getElementById('fleet-mat').value = '';
+  document.getElementById('fleet-motorista').value = '';
+  document.getElementById('fleet-tel').value = '';
+  document.getElementById('fleet-base').value = 'Pemba';
+  document.getElementById('fleet-estado').value = 'Operacional';
+  document.getElementById('modal-fleet').dataset.editId = '';
+  document.getElementById('modal-fleet').classList.add('open');
+}
+
+function editFleetVehicle(id) {
+  const v = getFleet().find(v => v.id === id);
+  if (!v) return;
+  document.getElementById('fleet-nome').value = v.nome;
+  document.getElementById('fleet-mat').value = v.mat;
+  document.getElementById('fleet-motorista').value = v.motorista;
+  document.getElementById('fleet-tel').value = v.tel;
+  document.getElementById('fleet-base').value = v.base;
+  document.getElementById('fleet-estado').value = v.estado;
+  document.getElementById('modal-fleet').dataset.editId = id;
+  document.getElementById('modal-fleet').classList.add('open');
+}
+
+function saveFleetVehicle() {
+  const editId = document.getElementById('modal-fleet').dataset.editId;
+  const v = {
+    id: editId || 'v' + Date.now(),
+    nome: document.getElementById('fleet-nome').value.trim(),
+    mat: document.getElementById('fleet-mat').value.trim(),
+    motorista: document.getElementById('fleet-motorista').value.trim(),
+    tel: document.getElementById('fleet-tel').value.trim(),
+    base: document.getElementById('fleet-base').value,
+    estado: document.getElementById('fleet-estado').value,
+  };
+  if (!v.nome) { toast('Indique o nome/modelo da viatura.', 'error'); return; }
+  let fleet = getFleet();
+  if (editId) fleet = fleet.map(f => f.id === editId ? v : f);
+  else fleet.push(v);
+  LS.set('fleet', fleet);
+  closeModal('modal-fleet');
+  renderFleet();
+  toast('Viatura guardada.', 'success');
+}
+
+function deleteFleetVehicle(id) {
+  if (!confirm('Eliminar esta viatura da frota?')) return;
+  LS.set('fleet', getFleet().filter(v => v.id !== id));
+  renderFleet();
+  toast('Viatura eliminada.', '');
+}
+
+// ═══════════════════════════════════════
+// EXPORT CSV
+// ═══════════════════════════════════════
+function exportCSV() {
+  const reqs = getRequests();
+  const headers = ['ID','Data Pedido','Estado','Nome','Dep','Tel','Data Saída','Data Regresso','Hora Saída','Hora Regresso','Partida','Destino','Projecto','Passageiros','Motivo','Viatura','Motorista','Contacto Motorista','Data Aprovação','Observações'];
+  const rows = reqs.map(r => [
+    r.id, r.created.slice(0,10), r.status, r.nome, r.dep, r.tel,
+    r.dataSaida, r.dataRegresso, r.horaSaida, r.horaRegresso,
+    r.partida, r.destino, r.projecto, r.pax, r.motivo,
+    r.viaturaNome, r.motorista, r.contactoMotorista, r.dataAprovacao, r.obsGestor
+  ].map(c => `"${(c||'').replace(/"/g,'""')}"`).join(','));
+  download('pedidos_viatura.csv', '\ufeff' + [headers.join(','), ...rows].join('\n'), 'text/csv');
+}
+
+function exportPlanCSV() {
+  const table = document.getElementById('plan-table');
+  const rows = [];
+  table.querySelectorAll('tr').forEach(tr => {
+    rows.push([...tr.querySelectorAll('th,td')].map(c => `"${c.innerText.replace(/"/g,'""')}"`).join(','));
+  });
+  download('plano_semanal.csv', '\ufeff' + rows.join('\n'), 'text/csv');
+}
+
+function download(filename, content, type) {
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([content], {type}));
+  a.download = filename;
+  a.click();
+}
+
+// ═══════════════════════════════════════
+// UTILITIES
+// ═══════════════════════════════════════
+function formatDate(iso) {
+  if (!iso) return '';
+  return new Date(iso).toLocaleDateString('pt-MZ', {day:'2-digit',month:'2-digit',year:'numeric'});
+}
+function formatDatePT(d) {
+  return `${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}/${d.getFullYear()}`;
+}
+
+function toast(msg, type='') {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.className = type;
+  el.style.display = 'block';
+  setTimeout(() => el.style.display = 'none', 3200);
+}
+
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+
+// Close modal on overlay click
+document.querySelectorAll('.modal-overlay').forEach(overlay => {
+  overlay.addEventListener('click', e => {
+    if (e.target === overlay) overlay.classList.remove('open');
+  });
+});
+
+// Offline detection
+window.addEventListener('online', () => document.getElementById('offline-badge').style.display = 'none');
+window.addEventListener('offline', () => document.getElementById('offline-badge').style.display = 'inline-block');
+if (!navigator.onLine) document.getElementById('offline-badge').style.display = 'inline-block';
+
+// ═══════════════════════════════════════
+// AUTH – Gestor de Frota
+// ═══════════════════════════════════════
+// Credenciais (hash simples — protecção básica para uso interno)
+const MANAGER_EMAIL = 'emoniz@ayudaenaccion.org';
+const MANAGER_HASH  = btoa('emoniz@ayudaenaccion.org:AeA@2023'); // base64 interno
+
+function isManager() {
+  return sessionStorage.getItem('aea_auth') === MANAGER_HASH;
+}
+
+function applyRole() {
+  const mgr = isManager();
+  // Nav buttons
+  document.querySelectorAll('.manager-only').forEach(el => {
+    el.style.display = mgr ? '' : 'none';
+  });
+  document.getElementById('nav-login-btn').style.display = mgr ? 'none' : '';
+  document.getElementById('nav-logout').style.display = mgr ? '' : 'none';
+  document.getElementById('manager-badge').style.display = mgr ? 'flex' : 'none';
+
+  // FAB só para gestor
+  document.getElementById('fab').style.display = '';
+
+  if (mgr) {
+    // Gestor: abre em Pedidos
+    showViewDirect('requests');
+    renderRequests();
+  } else {
+    // Colega: abre em formulário de requisição, sem acesso a outras páginas
+    showViewDirect('form');
+  }
+}
+
+function showViewDirect(v) {
+  document.querySelectorAll('.view').forEach(el => el.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(el => el.classList.remove('active'));
+  const viewEl = document.getElementById('view-' + v);
+  if (viewEl) viewEl.classList.add('active');
+  const navEl = document.querySelector(`[onclick="showView('${v}')"]`);
+  if (navEl) navEl.classList.add('active');
+}
+
+function showView(v) {
+  // Bloqueia acesso a páginas restritas se não for gestor
+  if (!isManager() && ['requests','plan','fleet'].includes(v)) {
+    toast('🔐 Acesso restrito ao Gestor de Frota.', 'error');
+    return;
+  }
+  showViewDirect(v);
+  if (v === 'requests') renderRequests();
+  if (v === 'plan') renderPlan();
+  if (v === 'fleet') renderFleet();
+}
+
+function openLoginModal() {
+  document.getElementById('login-screen').style.display = 'flex';
+  document.getElementById('login-email').value = '';
+  document.getElementById('login-pass').value = '';
+  document.getElementById('login-error').style.display = 'none';
+  setTimeout(() => document.getElementById('login-email').focus(), 100);
+}
+
+function closeLoginModal() {
+  document.getElementById('login-screen').style.display = 'none';
+}
+
+function doLogin() {
+  const email = document.getElementById('login-email').value.trim().toLowerCase();
+  const pass  = document.getElementById('login-pass').value;
+  const hash  = btoa(email + ':' + pass);
+  if (email === MANAGER_EMAIL && hash === MANAGER_HASH) {
+    sessionStorage.setItem('aea_auth', MANAGER_HASH);
+    closeLoginModal();
+    applyRole();
+    toast('✔ Bem-vindo, Eliseu!', 'success');
+  } else {
+    document.getElementById('login-error').style.display = 'block';
+    document.getElementById('login-pass').value = '';
+  }
+}
+
+function logout() {
+  sessionStorage.removeItem('aea_auth');
+  applyRole();
+  toast('Sessão terminada.', '');
+}
+
+function goToForm() {
+  showViewDirect('form');
+  window.scrollTo(0,0);
+}
+
+// ═══════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════
+initFleet();
+refreshReqNumber();
+updatePendingCount();
+
+// Aplicar perfil (gestor ou colega)
+applyRole();
+
+// Set today's date on form
+document.getElementById('f-data-saida').value = new Date().toISOString().slice(0,10);
+document.getElementById('f-data-regresso').value = new Date().toISOString().slice(0,10);
+
+// Set this week on plan
+const monday = getMondayOf(new Date());
+document.getElementById('week-start').value = monday.toISOString().slice(0,10);
+// ═══════════════════════════════════════
+// PWA – Service Worker + Install Prompt
+// ═══════════════════════════════════════
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('./sw.js')
+      .then(reg => console.log('SW registado:', reg.scope))
+      .catch(err => console.log('SW erro:', err));
+  });
+}
+
+// Banner de instalação
+let deferredPrompt;
+window.addEventListener('beforeinstallprompt', e => {
+  e.preventDefault();
+  deferredPrompt = e;
+  showInstallBanner();
+});
+
+function showInstallBanner() {
+  const banner = document.getElementById('install-banner');
+  if (banner) banner.style.display = 'flex';
+}
+
+function installApp() {
+  if (!deferredPrompt) return;
+  deferredPrompt.prompt();
+  deferredPrompt.userChoice.then(choice => {
+    if (choice.outcome === 'accepted') {
+      toast('✔ App instalada com sucesso!', 'success');
+    }
+    deferredPrompt = null;
+    document.getElementById('install-banner').style.display = 'none';
+  });
+}
+
+window.addEventListener('appinstalled', () => {
+  toast('✔ AeA Frota instalada!', 'success');
+  const banner = document.getElementById('install-banner');
+  if (banner) banner.style.display = 'none';
+});
+</script>
+</body>
+</html>
