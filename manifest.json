@@ -2,10 +2,10 @@
   "name": "AeA Frota – Moçambique",
   "short_name": "AeA Frota",
   "description": "Gestão de Frota – Ayuda en Acción Moçambique",
-  "start_url": "./index.html",
+  "start_url": "/aea-frota/index.html",
   "display": "standalone",
-  "background_color": "#f7f4f1",
-  "theme_color": "#c04e35",
+  "background_color": "#FAF8F5",
+  "theme_color": "#F26522",
   "orientation": "portrait-primary",
   "lang": "pt",
   "icons": [
@@ -22,21 +22,23 @@
       "purpose": "any maskable"
     }
   ],
-  "categories": ["productivity", "utilities"],
+  "categories": [
+    "productivity",
+    "utilities"
+  ],
   "shortcuts": [
     {
       "name": "Nova Requisição",
       "short_name": "Requisição",
       "description": "Pedir viatura",
-      "url": "./index.html#form",
-      "icons": [{ "src": "icon-192.png", "sizes": "192x192" }]
-    },
-    {
-      "name": "Plano Semanal",
-      "short_name": "Plano",
-      "description": "Ver plano da semana",
-      "url": "./index.html#plan",
-      "icons": [{ "src": "icon-192.png", "sizes": "192x192" }]
+      "url": "./index.html",
+      "icons": [
+        {
+          "src": "icon-192.png",
+          "sizes": "192x192"
+        }
+      ]
     }
-  ]
+  ],
+  "scope": "/aea-frota/"
 }
