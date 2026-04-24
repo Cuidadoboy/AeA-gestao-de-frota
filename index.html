@@ -751,17 +751,35 @@ function doLogin() {
 function logout() { sessionStorage.removeItem('aea_auth'); applyRole(); toast('Sessão terminada.',''); }
 
 // ── INIT ──
-(async () => {
-  document.getElementById('f-data').value = new Date().toISOString().slice(0,10);
-  document.getElementById('f-ret').value = new Date().toISOString().slice(0,10);
-  document.getElementById('wk').value = getMon(new Date()).toISOString().slice(0,10);
-  refreshRN();
-  updatePC();
-  applyRole();
-  setSyncBadge('syncing', 'A carregar...');
+// Mostrar a view imediatamente sem esperar pela cloud
+document.getElementById('f-data').value = new Date().toISOString().slice(0,10);
+document.getElementById('f-ret').value = new Date().toISOString().slice(0,10);
+document.getElementById('wk').value = getMon(new Date()).toISOString().slice(0,10);
+refreshRN();
+updatePC();
+// Mostrar o formulário imediatamente
+showDirect('form');
+document.querySelectorAll('.mgr').forEach(e => e.style.display = 'none');
+document.getElementById('nv-in').style.display = '';
+document.getElementById('nv-out').style.display = 'none';
+setSyncBadge('syncing', 'A carregar...');
+// Sincronizar em background sem bloquear o UI
+setTimeout(async () => {
   const data = await pullFromCloud();
-  if (data) { updatePC(); if(isMgr()) { renderStats(); renderReqs(); } }
-})();
+  if (data) {
+    updatePC();
+    if (isMgr()) { renderStats(); renderReqs(); }
+  }
+  // Se já tem sessão activa, aplicar o papel do gestor
+  if (isMgr()) {
+    document.querySelectorAll('.mgr').forEach(e => e.style.display = '');
+    document.getElementById('nv-in').style.display = 'none';
+    document.getElementById('nv-out').style.display = '';
+    showDirect('requests');
+    renderStats();
+    renderReqs();
+  }
+}, 0);
 
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => navigator.serviceWorker.register('./sw.js').catch(()=>{}));
