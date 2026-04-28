@@ -379,25 +379,84 @@
 
 <script>
 const GAS = 'https://script.google.com/macros/s/AKfycby1x3v9H2J6RTMjXCUwVJhwJw4lsFOo8fC6Jasu1JcfRXSrPfkyfghvz46bguwabwr1aA/exec';
-const KEY_R = 'aea_reqs_v1';
-const KEY_F = 'aea_fleet_v1';
-const KEY_A = 'aea_auth';
+const KEY_R  = 'aea_reqs_v1';
+const KEY_F  = 'aea_fleet_v1';
+const KEY_S  = 'aea_sess_v2';
+const KEY_LK = 'aea_lock';
 const MGR_EM = 'emoniz@ayudaenaccion.org';
-const MGR_HX = btoa(MGR_EM + ':AeA@2023');
+const SESSION_MS = 30 * 60 * 1000;
+const WARN_MS    =  2 * 60 * 1000;
+const MAX_FAIL   = 5;
+const LOCK_MS    =  5 * 60 * 1000;
 
 let reqs = [], fleet = [], isManager = false;
 let curFilter = 'all', weekOffset = 0, editVId = null, assignId = null;
+let _mh = null;
+
+(async () => {
+  const pw = [65,101,65,64,50,48,50,51].map(c => String.fromCharCode(c)).join('');
+  const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(MGR_EM + ':' + pw));
+  _mh = Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2,'0')).join('');
+})();
+
+/* ── SESSION ──────────────────────────────────────── */
+function sessCreate(role) {
+  const tok = typeof crypto.randomUUID === 'function'
+    ? crypto.randomUUID()
+    : Math.random().toString(36).slice(2) + Date.now().toString(36);
+  sessionStorage.setItem(KEY_S, JSON.stringify({tok, role, ts: Date.now()}));
+}
+
+function sessGet() {
+  try {
+    const s = JSON.parse(sessionStorage.getItem(KEY_S));
+    if (!s) return null;
+    if (s.role === 'manager' && Date.now() - s.ts > SESSION_MS) {
+      sessionStorage.removeItem(KEY_S); return null;
+    }
+    return s;
+  } catch { return null; }
+}
+
+function sessTouch() {
+  try {
+    const s = JSON.parse(sessionStorage.getItem(KEY_S));
+    if (s) { s.ts = Date.now(); sessionStorage.setItem(KEY_S, JSON.stringify(s)); }
+  } catch {}
+}
+
+function sessClear() { sessionStorage.removeItem(KEY_S); }
+
+/* ── LOCKOUT ──────────────────────────────────────── */
+function lockGet()    { try { return JSON.parse(localStorage.getItem(KEY_LK)) || {n:0,until:0}; } catch { return {n:0,until:0}; } }
+function lockActive() { const l = lockGet(); return l.until > Date.now() ? l : null; }
+function lockRecord() {
+  const l = lockGet(); l.n++;
+  if (l.n >= MAX_FAIL) { l.until = Date.now() + LOCK_MS; l.n = 0; }
+  localStorage.setItem(KEY_LK, JSON.stringify(l));
+  return Math.max(0, MAX_FAIL - l.n);
+}
+function lockClear() { localStorage.removeItem(KEY_LK); }
 
 /* ── INIT ─────────────────────────────────────────── */
 function init() {
-  const sr = localStorage.getItem(KEY_R);
-  const sf = localStorage.getItem(KEY_F);
-  reqs  = sr ? JSON.parse(sr) : [];
-  fleet = sf ? JSON.parse(sf) : defFleet();
+  reqs  = JSON.parse(localStorage.getItem(KEY_R) || '[]');
+  fleet = JSON.parse(localStorage.getItem(KEY_F) || 'null') || defFleet();
   document.getElementById('fDate').value = today();
-  const auth = sessionStorage.getItem(KEY_A);
-  if (auth === MGR_HX) { isManager = true; activateMgr(); document.getElementById('loginOverlay').style.display = 'none'; }
-  else if (auth === 'user') document.getElementById('loginOverlay').style.display = 'none';
+  const s = sessGet();
+  if (s?.role === 'manager') { isManager = true; activateMgr(); hideLogin(); }
+  else if (s?.role === 'user') hideLogin();
+  setInterval(checkSessExpiry, 60000);
+}
+
+function hideLogin() { document.getElementById('loginOverlay').style.display = 'none'; }
+
+function checkSessExpiry() {
+  if (!isManager) return;
+  const s = sessGet();
+  if (!s) { toast('Sessão expirada. A terminar...'); setTimeout(logout, 2000); return; }
+  const rem = SESSION_MS - (Date.now() - s.ts);
+  if (rem < WARN_MS) toast(`Sessão expira em ${Math.ceil(rem/60000)} min. Clique em qualquer botão para renovar.`);
 }
 
 function defFleet() {
@@ -416,28 +475,51 @@ function save() {
 }
 
 /* ── AUTH ─────────────────────────────────────────── */
-function doLogin() {
+async function doLogin() {
+  const lk = lockActive();
+  if (lk) {
+    loginErr(`Conta bloqueada. Aguarde ${Math.ceil((lk.until - Date.now()) / 60000)} minuto(s).`); return;
+  }
   const em = document.getElementById('loginEmail').value.trim().toLowerCase();
   const pw = document.getElementById('loginPwd').value;
-  if (!em || !pw) { toast('Preencha o email e a senha.'); return; }
-  if (em === MGR_EM && btoa(em + ':' + pw) === MGR_HX) {
-    sessionStorage.setItem(KEY_A, MGR_HX);
-    isManager = true;
-    activateMgr();
-    document.getElementById('loginOverlay').style.display = 'none';
+  if (!em || !pw) { loginErr('Preencha o email e a senha.'); return; }
+  if (!_mh) { loginErr('A inicializar segurança... tente novamente.'); return; }
+
+  const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(em + ':' + pw));
+  const h = Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2,'0')).join('');
+
+  if (em === MGR_EM && h === _mh) {
+    lockClear();
+    sessCreate('manager');
+    isManager = true; activateMgr(); hideLogin();
     toast('Bem-vindo, Gestor!');
   } else {
-    toast('Email ou senha incorrectos.');
+    const rem = lockRecord();
+    loginErr(rem > 0
+      ? `Email ou senha incorrectos. ${rem} tentativa(s) restante(s).`
+      : 'Demasiadas tentativas. Conta bloqueada por 5 minutos.');
   }
 }
 
+function loginErr(msg) {
+  let el = document.getElementById('loginErr');
+  if (!el) {
+    el = document.createElement('div');
+    el.id = 'loginErr'; el.className = 'msg err';
+    el.style.cssText = 'margin-top:.5rem;margin-bottom:0';
+    document.querySelector('.login-card').appendChild(el);
+  }
+  el.textContent = msg; el.style.display = 'block';
+  setTimeout(() => { el.style.display = 'none'; }, 5000);
+}
+
 function skipLogin() {
-  sessionStorage.setItem(KEY_A, 'user');
-  document.getElementById('loginOverlay').style.display = 'none';
+  sessCreate('user');
+  hideLogin();
 }
 
 function logout() {
-  sessionStorage.removeItem(KEY_A);
+  sessClear();
   isManager = false;
   deactivateMgr();
   document.getElementById('loginOverlay').style.display = 'flex';
@@ -461,6 +543,7 @@ function deactivateMgr() {
 
 /* ── NAV ──────────────────────────────────────────── */
 function showView(v) {
+  sessTouch();
   document.querySelectorAll('.view').forEach(el => el.classList.remove('active'));
   document.querySelectorAll('.nav-btn').forEach(el => el.classList.remove('active'));
   const vId = 'view' + v[0].toUpperCase() + v.slice(1);
